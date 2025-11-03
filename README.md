@@ -4,12 +4,12 @@
 
 ## Features
 
-- 🎚️ **Trigger from within Pro Tools** using SoundFlow panel (Pro Tools 2025.10+)
-- 🎹 **Keyboard shortcut support** - assign any hotkey you want
-- 🚀 **Programmatic bouncing** via Pro Tools Scripting SDK
-- 📤 **Automatic MASV upload** - no manual file transfers
-- 👥 **Multiple recipients** - send to clients, producers, team members
-- ⚡ **Fast workflow** - bounce and send in one action
+- **Trigger from within Pro Tools** using SoundFlow panel (Pro Tools 2025.10+)
+- **Keyboard shortcut support** - assign any hotkey you want
+- **Programmatic bouncing** via Pro Tools Scripting SDK
+- **Automatic MASV upload** - no manual file transfers
+- **Multiple recipients** - send to clients, producers, team members
+- **Fast workflow** - bounce and send in one action
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ cp .env.example .env
 sed -i '' 's/from PTSL\.2025\.06 import 0_pb2/# Fixed import\nimport sys, os, importlib.util\n_pb2_path = os.path.join(os.path.dirname(__file__), '\''0_pb2.py'\'')\n_spec = importlib.util.spec_from_file_location("PTSL_dot_2025_dot_06_dot_0__pb2", _pb2_path)\nPTSL_dot_2025_dot_06_dot_0__pb2 = importlib.util.module_from_spec(_spec)\n_spec.loader.exec_module(PTSL_dot_2025_dot_06_dot_0__pb2)\n# Original:/' generated/PTSL/2025/06/0_pb2_grpc.py
 ```
 
-### 4. Enable Pro Tools Scripting
+### 4. Enable Pro Tools Scripting -- need to work on this***
 
 In Pro Tools:
 1. Go to Setup > Preferences > EUCON
@@ -89,15 +89,15 @@ See **[SOUNDFLOW_SETUP.md](SOUNDFLOW_SETUP.md)** for complete setup instructions
 4. Press your hotkey anytime to bounce and send!
 
 **Benefits:**
-- ✅ Native to Pro Tools - no external apps needed
-- ✅ Keyboard shortcuts work inside Pro Tools
-- ✅ Professional workflow used by major studios
+- Native to Pro Tools - no external apps needed
+- Keyboard shortcuts work inside Pro Tools
+- Professional workflow used by major studios
 
 **Cost:** Requires SoundFlow AI ($10/mo) or Pro ($12/mo) subscription for custom scripts
 
 ---
 
-### Method 2: Command Line ⭐ FREE & RECOMMENDED
+### Method 2: Command Line -- FREE
 
 ```bash
 source venv/bin/activate
@@ -107,10 +107,10 @@ python3 src/bounce_and_send.py --cli
 Prompts for recipient emails in the terminal.
 
 **Benefits:**
-- ✅ No subscription required
-- ✅ Works with any Pro Tools version
-- ✅ No GUI dependencies needed
-- ✅ Simple and reliable
+- No subscription required
+- Works with any Pro Tools version
+- No GUI dependencies needed
+- Simple and reliable
 
 **Note:** GUI mode requires tkinter. Use `--cli` flag to avoid GUI dependencies.
 
@@ -136,7 +136,7 @@ Prompts for recipient emails in the terminal.
 │   ├── protools/                    # Pro Tools client wrapper
 │   ├── masv/                        # MASV API client
 │   └── bounce_and_send.py           # Main application
-├── SOUNDFLOW_SETUP.md               # SoundFlow integration guide ⭐
+├── SOUNDFLOW_SETUP.md               # SoundFlow integration guide 
 └── TROUBLESHOOTING.md               # Common issues and fixes
 ```
 
@@ -176,7 +176,7 @@ Prompts for recipient emails in the terminal.
 
 | Method | Pro Tools Version | Cost | Trigger Location | Best For |
 |--------|------------------|------|------------------|----------|
-| **Command Line** ⭐ | Any version | Free | Terminal | Most users - simple and reliable |
+| **Command Line**  | Any version | Free | Terminal | Most users - simple and reliable |
 | **SoundFlow** | 2025.10+ | $10-20/mo | Inside Pro Tools | Power users with existing subscription |
 
 ## License
