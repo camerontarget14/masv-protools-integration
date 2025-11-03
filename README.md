@@ -172,13 +172,6 @@ Prompts for recipient emails in the terminal.
    - See [SOUNDFLOW_SETUP.md](SOUNDFLOW_SETUP.md) for in-Pro-Tools triggering
    - Assign a keyboard shortcut and bounce/send directly from Pro Tools!
 
-## Which Method Should I Use?
-
-| Method | Pro Tools Version | Cost | Trigger Location | Best For |
-|--------|------------------|------|------------------|----------|
-| **Command Line**  | Any version | Free | Terminal | Most users - simple and reliable |
-| **SoundFlow** | 2025.10+ | $10-20/mo | Inside Pro Tools | Power users with existing subscription |
-
 ## License
 
 Pro Tools SDK files are subject to Avid SDK license agreement.
