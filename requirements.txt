@@ -1,0 +1,15 @@
+# Pro Tools gRPC Dependencies
+# Using latest versions with Python 3.14 support
+grpcio>=1.68.0
+grpcio-tools>=1.68.0
+protobuf>=5.29.0
+
+# MASV API Dependencies
+requests>=2.32.0
+
+# Configuration Management
+python-dotenv>=1.0.0
+
+# GUI (optional - for desktop interface)
+# Uncomment if building GUI version
+# tkinter is built-in for Python on Mac
