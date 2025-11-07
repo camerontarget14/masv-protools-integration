@@ -1,6 +1,8 @@
-# MASV Pro Tools Integration
+# (WIP) MASV Pro Tools Integration
 
-Automate bouncing Pro Tools sessions and sending them via MASV with a keyboard shortcut!
+Automate bouncing Pro Tools sessions and sending them via MASV with a keyboard shortcut.
+
+!! This integration needs a proper trigger, options include integration with "Sound Flow" a third-party automation tool that is now built into protools !!
 
 ## Features
 
