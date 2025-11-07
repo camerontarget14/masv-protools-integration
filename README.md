@@ -213,7 +213,6 @@ This project now uses the **official MASV Agent CLI** instead of direct REST API
 | **Command Line** ⭐ | Any version | Free | Terminal | Most users - simple and reliable |
 | **SoundFlow** | 2025.10+ | $10-20/mo | Inside Pro Tools | Power users with existing subscription |
 
->>>>>>> Stashed changes
 ## License
 
 Pro Tools SDK files are subject to Avid SDK license agreement.
