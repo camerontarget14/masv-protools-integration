@@ -35,8 +35,9 @@ wheels/
 .DS_Store
 Thumbs.db
 
-# Generated proto files (users generate these locally during setup)
-generated/
+# Generated proto files (we'll generate these locally)
+generated/*
+!generated/.gitkeep
 
 # Bounce output directory
 bounces/
