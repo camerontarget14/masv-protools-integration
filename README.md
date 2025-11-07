@@ -196,11 +196,6 @@ Prompts for recipient emails in the terminal.
    - See [SOUNDFLOW_SETUP.md](SOUNDFLOW_SETUP.md) for in-Pro-Tools triggering
    - Assign a keyboard shortcut and bounce/send directly from Pro Tools!
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
 ## Why MASV Agent?
 
 This project now uses the **official MASV Agent CLI** instead of direct REST API calls, providing:
