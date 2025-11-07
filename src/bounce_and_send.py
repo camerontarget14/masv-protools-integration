@@ -9,6 +9,7 @@ Can be triggered manually or via Keyboard Maestro.
 import os
 import sys
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Try to import tkinter, but make it optional
@@ -24,8 +25,8 @@ except ImportError:
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.protools import ProToolsClient
 from src.masv import MASVClient
+from src.protools import ProToolsClient
 
 
 class BounceAndSendApp:
@@ -40,6 +41,12 @@ class BounceAndSendApp:
         self.masv_team_id = os.getenv("MASV_TEAM_ID")
         self.protools_host = os.getenv("PROTOOLS_HOST", "localhost")
         self.protools_port = int(os.getenv("PROTOOLS_PORT", "50051"))
+
+        # MASV delivery settings
+        self.delivery_mode = os.getenv("MASV_DELIVERY_MODE", "email").lower()
+        self.portal_url = os.getenv("MASV_PORTAL_URL", "")
+        self.portal_password = os.getenv("MASV_PORTAL_PASSWORD", "")
+        self.default_recipients = os.getenv("MASV_DEFAULT_RECIPIENTS", "")
 
         # Bounce settings
         self.bounce_format = os.getenv("DEFAULT_BOUNCE_FORMAT", "WAV")
@@ -57,12 +64,13 @@ class BounceAndSendApp:
         if not self.masv_team_id:
             raise ValueError("MASV_TEAM_ID not found in .env file")
 
-    def bounce_and_send(self, recipients):
+    def bounce_and_send(self, recipients=None, portal_subdomain=None):
         """
         Main workflow: bounce Pro Tools session and send to MASV.
 
         Args:
-            recipients: List of recipient email addresses
+            recipients: List of recipient email addresses (for email mode)
+            portal_subdomain: Portal subdomain (for portal mode)
         """
         try:
             # Validate configuration
@@ -89,18 +97,46 @@ class BounceAndSendApp:
                     sample_rate=self.sample_rate,
                 )
 
-            # Upload to MASV
-            print(f"\nSending to: {', '.join(recipients)}")
+            # Upload to MASV based on delivery mode
             masv = MASVClient(self.masv_api_key, self.masv_team_id)
-            package_id = masv.send_file(
-                bounce_path, recipients, description=f"Pro Tools Bounce: {session_name}"
-            )
+
+            if self.delivery_mode == "portal":
+                # Portal upload
+                subdomain = portal_subdomain or self.portal_url
+                if not subdomain:
+                    raise ValueError("Portal URL/subdomain not configured in .env file")
+                print(f"\nSending to portal: {subdomain}")
+                package_id = masv.send_file(
+                    bounce_path,
+                    description=f"Pro Tools Bounce: {session_name}",
+                    portal_subdomain=subdomain,
+                    portal_password=self.portal_password
+                    if self.portal_password
+                    else None,
+                )
+                destination = f"Portal: {subdomain}"
+            else:
+                # Email upload
+                emails = recipients or [
+                    email.strip()
+                    for email in self.default_recipients.split(",")
+                    if email.strip()
+                ]
+                if not emails:
+                    raise ValueError("No recipients specified for email delivery")
+                print(f"\nSending to: {', '.join(emails)}")
+                package_id = masv.send_file(
+                    bounce_path,
+                    recipients=emails,
+                    description=f"Pro Tools Bounce: {session_name}",
+                )
+                destination = ", ".join(emails)
 
             print("\n" + "=" * 60)
             print(f"✓ SUCCESS!")
             print(f"  File: {bounce_path}")
             print(f"  Package ID: {package_id}")
-            print(f"  Recipients: {', '.join(recipients)}")
+            print(f"  Destination: {destination}")
             print("=" * 60)
 
             return bounce_path, package_id
@@ -113,21 +149,38 @@ class BounceAndSendApp:
         """Run in command-line mode."""
         print("Pro Tools Bounce and Send to MASV")
         print("-" * 40)
+        print(f"Delivery mode: {self.delivery_mode}")
 
-        # Get recipients
-        recipients_input = input(
-            "\nEnter recipient email addresses (comma-separated): "
-        )
-        recipients = [
-            email.strip() for email in recipients_input.split(",") if email.strip()
-        ]
+        if self.delivery_mode == "portal":
+            # Portal mode - use configured portal or prompt
+            if self.portal_url:
+                print(f"Using portal: {self.portal_url}")
+                self.bounce_and_send()
+            else:
+                print("\nNo portal configured in .env file")
+                return
+        else:
+            # Email mode - use default recipients or prompt
+            if self.default_recipients:
+                print(f"Using default recipients: {self.default_recipients}")
+                self.bounce_and_send()
+            else:
+                # Prompt for recipients
+                recipients_input = input(
+                    "\nEnter recipient email addresses (comma-separated): "
+                )
+                recipients = [
+                    email.strip()
+                    for email in recipients_input.split(",")
+                    if email.strip()
+                ]
 
-        if not recipients:
-            print("No recipients provided. Exiting.")
-            return
+                if not recipients:
+                    print("No recipients provided. Exiting.")
+                    return
 
-        # Execute bounce and send
-        self.bounce_and_send(recipients)
+                # Execute bounce and send
+                self.bounce_and_send(recipients=recipients)
 
     def run_gui(self):
         """Run with GUI dialog."""

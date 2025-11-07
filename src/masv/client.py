@@ -83,18 +83,22 @@ class MASVClient:
     def send_file(
         self,
         file_path: str,
-        recipients: List[str],
+        recipients: Optional[List[str]] = None,
         description: str = "Pro Tools Bounce",
         name: Optional[str] = None,
+        portal_subdomain: Optional[str] = None,
+        portal_password: Optional[str] = None,
     ) -> str:
         """
-        Upload and send a file to recipients using MASV Agent.
+        Upload and send a file using MASV Agent (email or portal).
 
         Args:
             file_path: Path to file to send
-            recipients: List of recipient email addresses
+            recipients: List of recipient email addresses (for email delivery)
             description: Package description
             name: Optional package name (defaults to filename)
+            portal_subdomain: Portal subdomain (for portal delivery)
+            portal_password: Optional portal password (for portal delivery)
 
         Returns:
             str: Upload ID
@@ -115,27 +119,55 @@ class MASVClient:
         if name is None:
             name = file_name
 
-        print(
-            f"Uploading {file_name} ({file_size / (1024 * 1024):.2f} MB) to {', '.join(recipients)}..."
-        )
-
-        # Build the upload command
-        emails = ",".join(recipients)
-        cmd = [
-            "masv",
-            "upload",
-            "start",
-            "email",
-            "--emails",
-            emails,
-            "--team-id",
-            self.team_id,
-            "--name",
-            name,
-            "--description",
-            description,
-            file_path,
-        ]
+        # Determine delivery mode
+        if portal_subdomain:
+            # Portal upload - requires sender email
+            sender_email = os.getenv("MASV_SENDER_EMAIL", "noreply@example.com")
+            print(
+                f"Uploading {file_name} ({file_size / (1024 * 1024):.2f} MB) to portal {portal_subdomain}..."
+            )
+            cmd = [
+                "masv",
+                "upload",
+                "start",
+                "portal",
+                "--subdomain",
+                portal_subdomain,
+                "--sender",
+                sender_email,
+                "--name",
+                name,
+                "--description",
+                description,
+                file_path,
+            ]
+            if portal_password:
+                cmd.extend(["--password", portal_password])
+        elif recipients:
+            # Email upload
+            print(
+                f"Uploading {file_name} ({file_size / (1024 * 1024):.2f} MB) to {', '.join(recipients)}..."
+            )
+            emails = ",".join(recipients)
+            cmd = [
+                "masv",
+                "upload",
+                "start",
+                "email",
+                "--emails",
+                emails,
+                "--team-id",
+                self.team_id,
+                "--name",
+                name,
+                "--description",
+                description,
+                file_path,
+            ]
+        else:
+            raise ValueError(
+                "Must provide either recipients (for email) or portal_subdomain (for portal)"
+            )
 
         # Set API key in environment
         env = {**os.environ, "MASV_API_KEY": self.api_key}
