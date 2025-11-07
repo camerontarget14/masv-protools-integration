@@ -76,7 +76,11 @@ MASV_PORTAL_PASSWORD=secret
 MASV_SENDER_EMAIL=you@example.com
 ```
 
-### 4. Generate Pro Tools gRPC Code
+### 6. Download ProTools SDK Files
+
+You need to download the SDK files for protools and agree to their license agreement for this integration.
+
+### 5. Generate Pro Tools gRPC Code
 
 ```bash
 ./venv/bin/python -m grpc_tools.protoc \
