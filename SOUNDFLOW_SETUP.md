@@ -39,8 +39,8 @@ This is the **recommended method** for triggering the bounce and send workflow. 
 
 We provide two versions:
 
-#### Option A: Simple Version (Recommended)
-Shows the Python GUI dialog for entering recipients.
+#### Option A: GUI Version (Shows Dialog)
+Shows the Python GUI dialog for entering recipients each time.
 
 1. **Open the script file**
    - Navigate to: `soundflow/bounce-and-send.js`
@@ -68,13 +68,21 @@ Shows the Python GUI dialog for entering recipients.
    - Paste into the SoundFlow script editor
    - Click **"Save"**
 
-#### Option B: Advanced Version
-Prompts for recipients directly in SoundFlow (no Python GUI).
+#### Option B: Pre-configured Recipients (Recommended)
+Set recipients in the script - no dialog needed.
 
 1. **Use the advanced script file**
    - Open: `soundflow/bounce-and-send-advanced.js`
-   - Follow the same steps as Option A above
-   - This version includes a SoundFlow dialog for entering recipients
+   - Update `PROJECT_PATH` as in Option A
+   - **Update the RECIPIENTS line:**
+     ```javascript
+     const RECIPIENTS = 'client@example.com, producer@example.com';
+     ```
+   - Leave empty (`''`) to show GUI dialog instead
+   
+2. **Follow steps 3-4 from Option A** to add to SoundFlow
+
+**Tip:** Create multiple scripts with different recipient lists for different clients!
 
 ### Step 3: Assign a Keyboard Shortcut
 

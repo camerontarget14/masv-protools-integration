@@ -1,8 +1,9 @@
 """Pro Tools Scripting API Client Wrapper."""
 
-import grpc
-import sys
 import os
+import sys
+
+import grpc
 
 # Add generated directory to path
 generated_path = os.path.abspath(
@@ -34,18 +35,19 @@ except ImportError:
 class ProToolsClient:
     """Client for interacting with Pro Tools via the Scripting API."""
 
-    def __init__(self, host="localhost", port=50051):
+    def __init__(self, host="localhost", port=31416):
         """
         Initialize Pro Tools client.
 
         Args:
             host: Pro Tools Scripting API host (default: localhost)
-            port: Pro Tools Scripting API port (default: 50051)
+            port: Pro Tools Scripting API port (default: 31416)
         """
         self.host = host
         self.port = port
         self.channel = None
         self.stub = None
+        self.session_id = None
 
     def connect(self):
         """Establish connection to Pro Tools."""
@@ -56,6 +58,41 @@ class ProToolsClient:
         self.stub = ptsl_pb2_grpc.PTSLStub(self.channel)
 
         print("Connected to Pro Tools!")
+
+        # Register the connection (required by Pro Tools SDK)
+        self._register_connection()
+
+    def _register_connection(self):
+        """Register this client connection with Pro Tools."""
+        import json
+
+        # Create registration request
+        registration_data = {
+            "company_name": "MASV Pro Tools Integration",
+            "application_name": "Bounce and Send",
+        }
+
+        header = ptsl_pb2.RequestHeader(
+            command=ptsl_pb2.CId_RegisterConnection, version=1
+        )
+
+        request = ptsl_pb2.Request(
+            header=header, request_body_json=json.dumps(registration_data)
+        )
+
+        # Send registration request
+        response = self.stub.SendGrpcRequest(request)
+
+        if response.header.status != ptsl_pb2.TStatus_Completed:
+            raise Exception(
+                f"Failed to register connection: {response.response_error_json}"
+            )
+
+        # Extract and save session_id from response
+        response_data = json.loads(response.response_body_json)
+        self.session_id = response_data.get("session_id")
+
+        print(f"Registered with Pro Tools! Session ID: {self.session_id}")
 
     def disconnect(self):
         """Close connection to Pro Tools."""
@@ -70,8 +107,10 @@ class ProToolsClient:
         Returns:
             dict: Session information including name, path, sample rate, etc.
         """
-        # Create request header
-        header = ptsl_pb2.RequestHeader(command=ptsl_pb2.GetSessionName, version=1)
+        # Create request header with session_id
+        header = ptsl_pb2.RequestHeader(
+            command=ptsl_pb2.CId_GetSessionName, version=1, session_id=self.session_id
+        )
 
         # Create request
         request = ptsl_pb2.Request(header=header)
@@ -79,7 +118,7 @@ class ProToolsClient:
         # Send request
         response = self.stub.SendGrpcRequest(request)
 
-        if response.header.status != ptsl_pb2.ResponseStatus_Success:
+        if response.header.status != ptsl_pb2.TStatus_Completed:
             raise Exception(
                 f"Failed to get session info: {response.response_error_json}"
             )
@@ -119,25 +158,38 @@ class ProToolsClient:
             session_info = self.get_session_info()
             file_name = session_info.get("session_name", "bounce")
 
+        # Sanitize filename - remove/replace problematic characters
+        import re
+
+        file_name = re.sub(
+            r'[<>:"/\\|?*\']', "_", file_name
+        )  # Replace special chars with underscore
+        file_name = file_name.strip()  # Remove leading/trailing whitespace
+
         # Build export mix request
         import json
 
         request_body = {
             "file_name": file_name,
-            "file_type": file_type,
-            "location_info": {"file_destination": "Custom", "directory": output_path},
-            "audio_info": {
-                "export_format": "WAV",
-                "bit_depth": bit_depth,
-                "sample_rate": sample_rate,
-                "delivery_format": "Interleaved",
+            "file_type": "EMFT_WAV",  # EM_FileType enum
+            "location_info": {
+                "file_destination": "EMFDestination_SessionFolder",
+                "directory": "Bounced Files",  # Relative to session folder
             },
-            "offline_bounce": offline_bounce,
-            "mix_source_list": [{"source_type": "EntireMix"}],
+            "audio_info": {
+                "export_format": "EF_WAV",  # ExportFormat enum
+                "bit_depth": f"Bit{bit_depth}",  # BitDepth enum (e.g., "Bit24")
+                "sample_rate": f"SR_{sample_rate}",  # SampleRate enum (e.g., "SR_48000")
+                "delivery_format": "EMDF_Interleaved",  # EM_DeliveryFormat enum
+            },
+            "offline_bounce": "TB_True",  # TripleBool enum
+            # Don't specify mix_source_list - let Pro Tools use the default/entire mix
         }
 
-        # Create request header
-        header = ptsl_pb2.RequestHeader(command=ptsl_pb2.ExportMix, version=1)
+        # Create request header with session_id
+        header = ptsl_pb2.RequestHeader(
+            command=ptsl_pb2.CId_ExportMix, version=1, session_id=self.session_id
+        )
 
         # Create request
         request = ptsl_pb2.Request(
@@ -148,7 +200,7 @@ class ProToolsClient:
         print(f"Bouncing to {output_path}/{file_name}...")
         response = self.stub.SendGrpcRequest(request)
 
-        if response.header.status != ptsl_pb2.ResponseStatus_Success:
+        if response.header.status != ptsl_pb2.TStatus_Completed:
             error_msg = (
                 response.response_error_json
                 if response.response_error_json
@@ -156,7 +208,32 @@ class ProToolsClient:
             )
             raise Exception(f"Bounce failed: {error_msg}")
 
-        bounce_path = os.path.join(output_path, f"{file_name}.{file_type.lower()}")
+        # File is bounced to session folder / Bounced Files directory
+        # Use GetSessionPath to get the actual session file path
+        header = ptsl_pb2.RequestHeader(
+            command=ptsl_pb2.CId_GetSessionPath, version=1, session_id=self.session_id
+        )
+        request = ptsl_pb2.Request(header=header)
+        response = self.stub.SendGrpcRequest(request)
+
+        if response.header.status == ptsl_pb2.TStatus_Completed:
+            import json
+
+            path_data = json.loads(response.response_body_json)
+            session_path = path_data.get("session_path", {}).get("path", "")
+
+            if session_path:
+                session_folder = os.path.dirname(session_path)
+                bounce_path = os.path.join(
+                    session_folder, "Bounced Files", f"{file_name}.wav"
+                )
+            else:
+                # Fallback
+                bounce_path = f"{file_name}.wav"
+        else:
+            # Fallback if path command fails
+            bounce_path = f"{file_name}.wav"
+
         print(f"Bounce complete: {bounce_path}")
 
         return bounce_path

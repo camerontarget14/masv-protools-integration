@@ -16,15 +16,17 @@
 ### For SoundFlow Integration (Pro Tools 2025.10+)
 1. **Pro Tools 2025.10+** (SoundFlow built-in)
 2. **SoundFlow AI or Pro subscription** ($10-20/month) - Required for custom scripts
-3. **MASV Account** with API access
-4. **Python 3.8+**
+3. **MASV Agent** - Official MASV uploader ([Download here](https://developer.massive.io/transfer-agent/latest/))
+4. **MASV Account** with API access
+5. **Python 3.8+**
 
 > **Note:** SoundFlow's free tier includes 1,700+ pre-built macros but does not allow custom scripts. Custom script creation requires a paid subscription.
 
 ### For Alternative Methods (without SoundFlow)
 1. **Pro Tools 2022.12+** with Scripting SDK enabled
-2. **MASV Account** with API access
-3. **Python 3.8+**
+2. **MASV Agent** - Official MASV uploader ([Download here](https://developer.massive.io/transfer-agent/latest/))
+3. **MASV Account** with API access
+4. **Python 3.8+**
 
 ## Setup
 
@@ -41,7 +43,24 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Configure Environment Variables
+### 2. Install MASV Agent
+
+**MASV Agent is required for optimized file transfers.**
+
+Download and install from: https://developer.massive.io/transfer-agent/latest/
+
+**Platform-specific installation:**
+- **macOS**: Download the .dmg installer and drag MASV Agent to Applications
+- **Windows**: Download and run the .exe installer
+- **Linux**: Follow the installation guide for your distribution
+- **Docker**: Available for cross-platform deployment
+
+**Verify installation:**
+```bash
+masv --version
+```
+
+### 3. Configure Environment Variables
 
 ```bash
 # Copy example env file
@@ -52,7 +71,7 @@ cp .env.example .env
 # - Get MASV Team ID from MASV dashboard
 ```
 
-### 3. Generate gRPC Code from Proto Files
+### 4. Generate gRPC Code from Proto Files
 
 ```bash
 # Generate Python code from Pro Tools proto files
@@ -67,12 +86,17 @@ cp .env.example .env
 sed -i '' 's/from PTSL\.2025\.06 import 0_pb2/# Fixed import\nimport sys, os, importlib.util\n_pb2_path = os.path.join(os.path.dirname(__file__), '\''0_pb2.py'\'')\n_spec = importlib.util.spec_from_file_location("PTSL_dot_2025_dot_06_dot_0__pb2", _pb2_path)\nPTSL_dot_2025_dot_06_dot_0__pb2 = importlib.util.module_from_spec(_spec)\n_spec.loader.exec_module(PTSL_dot_2025_dot_06_dot_0__pb2)\n# Original:/' generated/PTSL/2025/06/0_pb2_grpc.py
 ```
 
+<<<<<<< Updated upstream
 ### 4. Enable Pro Tools Scripting -- need to work on this***
+=======
+### 5. Pro Tools Scripting Setup
+>>>>>>> Stashed changes
 
-In Pro Tools:
-1. Go to Setup > Preferences > EUCON
-2. Enable "Enable EUCON & Pro Tools Scripting API"
-3. Restart Pro Tools
+**No preferences needed!** The Pro Tools Scripting SDK works automatically if:
+- You have **Pro Tools 2022.12 or later** (including Artist, Studio, Ultimate, or even the free Intro version)
+- Pro Tools is **running with a session open**
+
+The gRPC server starts automatically on port **31416** when Pro Tools launches.
 
 ## Usage
 
@@ -134,7 +158,7 @@ Prompts for recipient emails in the terminal.
 │   └── bounce-and-send-advanced.js  # Advanced with SoundFlow dialogs
 ├── src/
 │   ├── protools/                    # Pro Tools client wrapper
-│   ├── masv/                        # MASV API client
+│   ├── masv/                        # MASV Agent CLI wrapper
 │   └── bounce_and_send.py           # Main application
 ├── SOUNDFLOW_SETUP.md               # SoundFlow integration guide 
 └── TROUBLESHOOTING.md               # Common issues and fixes
@@ -144,10 +168,14 @@ Prompts for recipient emails in the terminal.
 
 1. **Setup** (one-time):
    ```bash
-   # Install dependencies
+   # Install Python dependencies
    python3 -m venv venv
    source venv/bin/activate
    pip install -r requirements.txt
+   
+   # Install MASV Agent
+   # Download from: https://developer.massive.io/transfer-agent/latest/
+   # Verify: masv --version
    
    # Generate gRPC code
    ./venv/bin/python -m grpc_tools.protoc -I. --python_out=./generated --grpc_python_out=./generated PTSL.2025.06.0.proto
@@ -172,6 +200,26 @@ Prompts for recipient emails in the terminal.
    - See [SOUNDFLOW_SETUP.md](SOUNDFLOW_SETUP.md) for in-Pro-Tools triggering
    - Assign a keyboard shortcut and bounce/send directly from Pro Tools!
 
+<<<<<<< Updated upstream
+=======
+## Why MASV Agent?
+
+This project now uses the **official MASV Agent CLI** instead of direct REST API calls, providing:
+
+- **Optimized transfer speeds** - MASV Agent is specifically tuned for performance
+- **Automatic retry logic** - Handles network interruptions gracefully
+- **Better error handling** - Production-tested reliability
+- **Official support** - Maintained by MASV with regular updates
+- **Consistent with MASV ecosystem** - Same tool used across platforms
+
+## Which Method Should I Use?
+
+| Method | Pro Tools Version | Cost | Trigger Location | Best For |
+|--------|------------------|------|------------------|----------|
+| **Command Line** ⭐ | Any version | Free | Terminal | Most users - simple and reliable |
+| **SoundFlow** | 2025.10+ | $10-20/mo | Inside Pro Tools | Power users with existing subscription |
+
+>>>>>>> Stashed changes
 ## License
 
 Pro Tools SDK files are subject to Avid SDK license agreement.
