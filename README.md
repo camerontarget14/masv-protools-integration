@@ -1,6 +1,6 @@
 # MASV Pro Tools Integration
 
-**Automate bouncing Pro Tools sessions and sending them via MASV file transfer - can be triggered directly from within Pro Tools**
+**Automate bouncing Pro Tools sessions and sending them via MASV file transfer - triggered directly from within Pro Tools!**
 
 ## Features
 
