@@ -86,11 +86,7 @@ cp .env.example .env
 sed -i '' 's/from PTSL\.2025\.06 import 0_pb2/# Fixed import\nimport sys, os, importlib.util\n_pb2_path = os.path.join(os.path.dirname(__file__), '\''0_pb2.py'\'')\n_spec = importlib.util.spec_from_file_location("PTSL_dot_2025_dot_06_dot_0__pb2", _pb2_path)\nPTSL_dot_2025_dot_06_dot_0__pb2 = importlib.util.module_from_spec(_spec)\n_spec.loader.exec_module(PTSL_dot_2025_dot_06_dot_0__pb2)\n# Original:/' generated/PTSL/2025/06/0_pb2_grpc.py
 ```
 
-<<<<<<< Updated upstream
-### 4. Enable Pro Tools Scripting -- need to work on this***
-=======
 ### 5. Pro Tools Scripting Setup
->>>>>>> Stashed changes
 
 **No preferences needed!** The Pro Tools Scripting SDK works automatically if:
 - You have **Pro Tools 2022.12 or later** (including Artist, Studio, Ultimate, or even the free Intro version)
@@ -160,7 +156,7 @@ Prompts for recipient emails in the terminal.
 │   ├── protools/                    # Pro Tools client wrapper
 │   ├── masv/                        # MASV Agent CLI wrapper
 │   └── bounce_and_send.py           # Main application
-├── SOUNDFLOW_SETUP.md               # SoundFlow integration guide 
+├── SOUNDFLOW_SETUP.md               # SoundFlow integration guide
 └── TROUBLESHOOTING.md               # Common issues and fixes
 ```
 
@@ -172,14 +168,14 @@ Prompts for recipient emails in the terminal.
    python3 -m venv venv
    source venv/bin/activate
    pip install -r requirements.txt
-   
+
    # Install MASV Agent
    # Download from: https://developer.massive.io/transfer-agent/latest/
    # Verify: masv --version
-   
+
    # Generate gRPC code
    ./venv/bin/python -m grpc_tools.protoc -I. --python_out=./generated --grpc_python_out=./generated PTSL.2025.06.0.proto
-   
+
    # Configure credentials
    cp .env.example .env
    # Edit .env with your MASV API key and Team ID
@@ -201,7 +197,10 @@ Prompts for recipient emails in the terminal.
    - Assign a keyboard shortcut and bounce/send directly from Pro Tools!
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 ## Why MASV Agent?
 
 This project now uses the **official MASV Agent CLI** instead of direct REST API calls, providing:
