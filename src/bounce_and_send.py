@@ -44,7 +44,19 @@ class BounceAndSendApp:
 
         # MASV delivery settings
         self.delivery_mode = os.getenv("MASV_DELIVERY_MODE", "email").lower()
-        self.portal_url = os.getenv("MASV_PORTAL_URL", "")
+        portal_url_raw = os.getenv("MASV_PORTAL_URL", "")
+        # Extract subdomain from URL if full URL provided
+        if portal_url_raw.startswith("http://") or portal_url_raw.startswith(
+            "https://"
+        ):
+            # Extract subdomain from URL like https://clientname.portal.massive.io
+            import re
+
+            match = re.match(r"https?://([^.]+)\..*", portal_url_raw)
+            self.portal_url = match.group(1) if match else portal_url_raw
+        else:
+            # Already just the subdomain
+            self.portal_url = portal_url_raw
         self.portal_password = os.getenv("MASV_PORTAL_PASSWORD", "")
         self.default_recipients = os.getenv("MASV_DEFAULT_RECIPIENTS", "")
 
