@@ -25,7 +25,7 @@ Automate bouncing Pro Tools sessions and sending them via MASV with a keyboard s
 
 ```bash
 # Clone repository
-git clone <your-repo-url>
+git clone https://github.com/camerontarget14/masv-protools-integration/
 cd masv-protools-integration
 
 # Create virtual environment
