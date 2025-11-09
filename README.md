@@ -4,6 +4,10 @@ Automate bouncing Pro Tools sessions and sending them via MASV with a keyboard s
 
 !! This integration needs a proper trigger, options include integration with "Sound Flow" a third-party automation tool that is now built into protools !!
 
+## ⚠️ Pro Tools SDK License Agreement Required
+
+**This project does NOT include Pro Tools SDK files.** You must download the Pro Tools Scripting SDK directly from Avid and agree to their license terms before using this integration. See [Setup section](#4-download-and-setup-pro-tools-sdk-files) for details.
+
 ## Features
 
 - **Keyboard shortcut triggered** - One hotkey to bounce and send
@@ -78,19 +82,68 @@ MASV_PORTAL_PASSWORD=secret
 MASV_SENDER_EMAIL=you@example.com
 ```
 
-### 6. Download ProTools SDK Files
+### 4. Download and Setup Pro Tools SDK Files
 
-You need to download the SDK files for protools and agree to their license agreement for this integration.
+**IMPORTANT:** This integration requires the Pro Tools Scripting SDK files, which are NOT included in this repository. You must download them directly from Avid and agree to their license terms.
 
-### 5. Generate Pro Tools gRPC Code
+#### Download the SDK:
+1. Visit the [Avid Pro Tools SDK page](https://www.avid.com/alliance-partner-program/pro-tools-integration)
+2. Sign in or create an Avid developer account
+3. Download the **Pro Tools Scripting SDK** (version 2025.06.0 or later)
+4. Review and accept Avid's SDK license agreement
+
+#### Extract the Proto File:
+After downloading, locate the protobuf definition file:
+- Look for: `PTSL.2025.06.0.proto` (or similar version)
+- Copy it to the root of this project directory
+
+#### Generate Python gRPC Code:
+Once you have the `.proto` file, generate the Python code:
 
 ```bash
-./venv/bin/python -m grpc_tools.protoc \
+# Make sure you're in the project directory with venv activated
+source venv/bin/activate
+
+# Generate the gRPC Python files
+python -m grpc_tools.protoc \
   -I. \
   --python_out=./generated \
   --grpc_python_out=./generated \
   PTSL.2025.06.0.proto
 ```
+
+This will create:
+- `generated/PTSL/2025/06/0_pb2.py` - Protocol buffer definitions
+- `generated/PTSL/2025/06/0_pb2_grpc.py` - gRPC client/server code
+
+#### Fix Import Issues in Generated Files:
+The generated `0_pb2_grpc.py` file will have an import statement that doesn't work in Python (because of numeric folder names). You need to fix it:
+
+1. Open `generated/PTSL/2025/06/0_pb2_grpc.py`
+2. Find line 6: `from PTSL.2025.06 import 0_pb2 as PTSL_dot_2025_dot_06_dot_0__pb2`
+3. Replace it with:
+```python
+import importlib.util
+import os
+
+# Import 0_pb2 using importlib since the path contains numbers
+_pb2_path = os.path.join(os.path.dirname(__file__), '0_pb2.py')
+_spec = importlib.util.spec_from_file_location("PTSL_dot_2025_dot_06_dot_0__pb2", _pb2_path)
+PTSL_dot_2025_dot_06_dot_0__pb2 = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(PTSL_dot_2025_dot_06_dot_0__pb2)
+```
+
+**Why this step is needed:** The Pro Tools SDK uses folder names with numbers (2025/06), which creates invalid Python import paths. This workaround uses `importlib` to load the module directly.
+
+### 5. Verify Setup
+
+Test that the SDK files are properly configured:
+
+```bash
+python -c "from src.protools import ProToolsClient; print('SDK setup successful!')"
+```
+
+If you see "SDK setup successful!", you're ready to go!
 
 ## Setting Up Keyboard Shortcut
 
@@ -237,6 +290,6 @@ chmod +x run_bounce_and_send.sh
 
 ## License
 
-MIT License
+MIT License - applies to this integration code only.
 
-Pro Tools SDK files subject to Avid SDK license agreement.
+**Pro Tools SDK files are NOT included in this repository.** The Pro Tools Scripting SDK is subject to Avid's SDK license agreement. You must download the SDK directly from Avid and agree to their terms separately. This project simply provides integration code that uses the SDK once you have obtained it legally.
