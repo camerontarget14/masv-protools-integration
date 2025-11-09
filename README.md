@@ -2,6 +2,9 @@
 
 Automate bouncing Pro Tools sessions and sending them via MASV with a keyboard shortcut.
 
+<img width="678" height="401" alt="Screenshot 2025-11-08 at 8 47 50 PM" src="https://github.com/user-attachments/assets/e7fdea2a-bed6-4e11-a849-c6501300eecd" />
+
+
 !! This integration needs a proper trigger, options include integration with "Sound Flow" a third-party automation tool that is now built into protools !!
 
 ## ⚠️ Pro Tools SDK License Agreement Required
@@ -73,6 +76,9 @@ nano .env
 ```bash
 MASV_DELIVERY_MODE=email
 ```
+
+<img width="769" height="408" alt="Screenshot 2025-11-08 at 8 48 34 PM" src="https://github.com/user-attachments/assets/6ad15f07-abb6-4ece-ba1b-c6f691c0f0d0" />
+
 
 **For portal delivery:**
 ```bash
