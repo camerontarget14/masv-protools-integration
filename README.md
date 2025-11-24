@@ -1,8 +1,8 @@
-# (WIP) MASV Pro Tools Integration
+# MASV Pro Tools Integration
 
 One-button bounce and upload to MASV from Pro Tools.
 
-<img width="678" height="401" alt="Screenshot 2025-11-08 at 8 47 50 PM" src="https://github.com/user-attachments/assets/e7fdea2a-bed6-4e11-a849-c6501300eecd" />
+<img width="678" alt="Screenshot 2025-11-08 at 8 47 50 PM" src="https://github.com/user-attachments/assets/e7fdea2a-bed6-4e11-a849-c6501300eecd" />
 
 ## ⚠️ Pro Tools SDK Required
 
